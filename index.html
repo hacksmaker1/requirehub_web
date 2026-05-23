@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RequireHub</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Inter, Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0b0f1a, #111827);
+    color: white;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background: rgba(15,15,15,0.98);
+    border-right: 1px solid #252525;
+    padding: 20px;
+    display: none;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #00a2ff;
+    margin-bottom: 30px;
+}
+
+.navBtn {
+    width: 100%;
+    background: #181818;
+    border: 1px solid #2f2f2f;
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.main {
+    margin-left: 0;
+    padding: 30px;
+    transition: 0.3s;
+}
+
+.loginBox {
+    width: 420px;
+    background: rgba(18,18,18,0.95);
+    border: 1px solid #2a2a2a;
+    border-radius: 18px;
+    padding: 25px;
+    margin: auto;
+    margin-top: 100px;
+}
+
+.panel {
+    display: none;
+    margin-left: 270px;
+    padding: 30px;
+}
+
+.invitePanel {
+    display: none;
+    background: rgba(15,15,15,0.9);
+    border: 1px solid #2b2b2b;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.inviteKeyBox {
+    background: #1c1c1c;
+    border: 1px solid #303030;
+    padding: 14px;
+    border-radius: 12px;
+    margin-top: 12px;
+    font-weight: bold;
+    color: #7ecbff;
+    word-break: break-all;
+}
+
+.topbar {
+    background: rgba(15,15,15,0.9);
+    border: 1px solid #262626;
+    padding: 18px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.welcome {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.searchBox {
+    width: 300px;
+}
+
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: rgba(20,20,20,0.95);
+    border: 1px solid #2f2f2f;
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.cardTitle {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.requireText {
+    color: #7ecbff;
+    word-break: break-all;
+    margin-bottom: 14px;
+}
+
+.inputGroup {
+    background: rgba(15,15,15,0.9);
+    border: 1px solid #2b2b2b;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    background: #1c1c1c;
+    border: 1px solid #303030;
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    margin-top: 12px;
+    outline: none;
+}
+
+button {
+    background: #00a2ff;
+    border: none;
+    color: white;
+    padding: 13px;
+    border-radius: 12px;
+    margin-top: 12px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.rowBtns {
+    display: flex;
+    gap: 10px;
+}
+
+.rowBtns button {
+    flex: 1;
+}
+
+.status {
+    margin-top: 12px;
+    color: #ff6868;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <div class="logo">RequireHub</div>
+
+    <button class="navBtn">📦 Scripts</button>
+    <button class="navBtn" onclick="toggleInvitePanel()">🔑 Invite System</button>
+    <button class="navBtn" onclick="logout()">🚪 Logout</button>
+</div>
+
+<div class="main" id="main">
+
+<div class="loginBox" id="loginBox">
+<div id="login">
+    <div class="logo">RequireHub</div>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <input type="text" id="invite" placeholder="Invite Key">
+
+    <button onclick="login()">Login</button>
+
+    <div class="status" id="status"></div>
+</div>
+
+</div>
+</div>
+
+<div class="panel" id="panel">
+
+<div class="topbar">
+    <div class="welcome">Welcome back</div>
+
+    <input class="searchBox" type="text" id="searchBar" placeholder="Search Scripts" onkeyup="loadScripts()">
+</div>
+
+<div class="invitePanel" id="invitePanel">
+    <h2>Invite System</h2>
+
+    <button onclick="generateInvite()">Generate Invite Key</button>
+
+    <div class="inviteKeyBox" id="generatedInvite">
+        No invite generated
+    </div>
+</div>
+
+<div class="inputGroup">
+    <h2>Add Require Script</h2>
+
+    <input type="text" id="scriptName" placeholder="Script Name">
+    <input type="text" id="requireID" placeholder="Require ID">
+
+    <button onclick="addScript()">Add Script</button>
+</div>
+
+<div class="cardGrid" id="scriptList"></div>
+
+<script>
+const INVITE_KEY = "TRUSTED2026";
+
+if(localStorage.getItem("loggedIn") === "true") {
+    openPanel();
+}
+
+function login() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+    const invite = document.getElementById("invite").value;
+
+    if(!user || !pass || !invite) {
+        setStatus("Fill all fields");
+        return;
+    }
+
+    const customInvite = localStorage.getItem("customInvite") || INVITE_KEY;
+
+    if(invite !== customInvite) {
+        setStatus("Wrong invite key");
+        return;
+    }
+
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", user);
+
+    openPanel();
+}
+
+function openPanel() {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+    document.getElementById("sidebar").style.display = "block";
+
+    document.getElementById("main").style.marginLeft = "240px";
+
+    loadScripts();
+}
+
+function toggleInvitePanel() {
+    const panel = document.getElementById("invitePanel");
+
+    if(panel.style.display === "block") {
+        panel.style.display = "none";
+    } else {
+        panel.style.display = "block";
+    }
+}
+
+function generateInvite() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    let key = "RH-";
+
+    for(let i = 0; i < 12; i++) {
+        key += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    document.getElementById("generatedInvite").innerText = key;
+
+    localStorage.setItem("customInvite", key);
+}
+
+function logout() {
+    localStorage.removeItem("loggedIn");
+    location.reload();
+}
+
+function setStatus(text) {
+    document.getElementById("status").innerText = text;
+}
+
+function addScript() {
+    const name = document.getElementById("scriptName").value;
+    const id = document.getElementById("requireID").value;
+
+    if(!name || !id) return;
+
+    let scripts = JSON.parse(localStorage.getItem("scripts") || "[]");
+
+    scripts.push({
+        name: name,
+        id: id
+    });
+
+    localStorage.setItem("scripts", JSON.stringify(scripts));
+
+    document.getElementById("scriptName").value = "";
+    document.getElementById("requireID").value = "";
+
+    loadScripts();
+}
+
+function deleteScript(index) {
+    let scripts = JSON.parse(localStorage.getItem("scripts") || "[]");
+
+    scripts.splice(index, 1);
+
+    localStorage.setItem("scripts", JSON.stringify(scripts));
+
+    loadScripts();
+}
+
+function copyRequire(id) {
+    navigator.clipboard.writeText(`require(${id})`);
+    alert("Copied require(" + id + ")");
+}
+
+function loadScripts() {
+    const list = document.getElementById("scriptList");
+
+    list.innerHTML = "";
+
+    let scripts = JSON.parse(localStorage.getItem("scripts") || "[]");
+
+    const search = document.getElementById("searchBar")
+        ? document.getElementById("searchBar").value.toLowerCase()
+        : "";
+
+    scripts.forEach((script, index) => {
+
+        if(
+            !script.name.toLowerCase().includes(search) &&
+            !script.id.toLowerCase().includes(search)
+        ) return;
+        list.innerHTML += `
+        <div class="card">
+            <div class="cardTitle">${script.name}</div>
+            <div class="requireText">require(${script.id})</div>
+
+            <div class="rowBtns">
+                <button onclick="copyRequire('${script.id}')">Copy</button>
+                <button onclick="deleteScript(${index})">Delete</button>
+            </div>
+        </div>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>
